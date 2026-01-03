@@ -1,0 +1,41 @@
+#!/usr/bin/expect -f
+#
+# Wrapper för Claude Code som automatiskt fortsätter vid timeout-prompts
+#
+# Användning: claude-auto [vanliga claude argument]
+#
+# Installera expect först:
+#   Ubuntu/Debian: sudo apt install expect
+#   macOS: brew install expect
+#
+
+set timeout -1
+
+# Starta claude med alla argument
+spawn claude {*}$argv
+
+# Loop för att hantera prompts
+expect {
+    # Vanliga fortsätt-prompts (anpassa efter faktiska meddelanden)
+    -re {(?i)continue\?|fortsätt\?|keep going\?|vill du fortsätta} {
+        send "y\r"
+        exp_continue
+    }
+
+    # Timeout-varning
+    -re {(?i)still working|fortfarande} {
+        send "y\r"
+        exp_continue
+    }
+
+    # Bekräfta operationer
+    -re {(?i)\[y/n\]} {
+        # Var försiktig här - kanske inte auto-confirm allt
+        exp_continue
+    }
+
+    # Vänta på mer output
+    eof {
+        # Claude avslutade
+    }
+}
