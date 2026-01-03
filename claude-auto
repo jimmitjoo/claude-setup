@@ -16,7 +16,19 @@ spawn claude {*}$argv
 
 # Loop för att hantera prompts
 expect {
-    # Vanliga fortsätt-prompts (anpassa efter faktiska meddelanden)
+    # Plan mode prompt - godkänn automatiskt
+    -re {(?i)plan mode|enter plan mode|planläge|vill du gå in i plan} {
+        send "y\r"
+        exp_continue
+    }
+
+    # Exit plan mode / approve plan
+    -re {(?i)approve|godkänn|exit plan|avsluta plan|proceed|fortsätt med plan} {
+        send "y\r"
+        exp_continue
+    }
+
+    # Vanliga fortsätt-prompts
     -re {(?i)continue\?|fortsätt\?|keep going\?|vill du fortsätta} {
         send "y\r"
         exp_continue
@@ -28,9 +40,21 @@ expect {
         exp_continue
     }
 
-    # Bekräfta operationer
-    -re {(?i)\[y/n\]} {
-        # Var försiktig här - kanske inte auto-confirm allt
+    # Generell [y/n] prompt - auto-confirm
+    -re {\[y/n\]} {
+        send "y\r"
+        exp_continue
+    }
+
+    # Yes/No prompt
+    -re {(?i)\(yes/no\)|\(y/n\)} {
+        send "yes\r"
+        exp_continue
+    }
+
+    # Permission prompts
+    -re {(?i)allow|tillåt|permission} {
+        send "y\r"
         exp_continue
     }
 
