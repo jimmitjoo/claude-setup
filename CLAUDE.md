@@ -26,6 +26,16 @@
 - Squash commits före merge till main
 - **VIKTIGT: Nämn ALDRIG Claude, Claude Code, AI, eller liknande i commits, PR-beskrivningar eller kodkommentarer**
 
+### Arbetsflöde - Git som versionshantering, inte filnamn
+- **ALDRIG** parallella filer (script-v1.sh, script-alt.sh) - använd git istället
+- Vid ny approach: commit → radera → implementera ny → testa
+- Om ny approach misslyckas: `git checkout` för att återställa
+- **Git worktrees för parallella experiment:**
+  - `git worktree add ../projekt-experiment experiment/feature-x`
+  - Subagenter kan jobba i olika worktrees samtidigt
+  - Jämför resultat, behåll bästa, ta bort resten
+  - `git worktree remove ../projekt-experiment`
+
 ## Verktyg & Preferenser
 - pnpm > yarn > npm
 - Vitest för testning
