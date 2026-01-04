@@ -1,4 +1,5 @@
 ---
+description: Skapa en Pull Request för nuvarande ändringar
 argument-hint: "branch eller beskrivning (optional)"
 ---
 

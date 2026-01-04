@@ -1,3 +1,7 @@
+---
+description: Granska kod för komplexitet och förenklingsmöjligheter
+---
+
 Använd code-reviewer agenten för att granska koden.
 
 Fokusera på:
