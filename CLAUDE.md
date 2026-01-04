@@ -38,9 +38,33 @@
 
 ## Verktyg & Preferenser
 - pnpm > yarn > npm
-- Vitest för testning
+- Vitest för testning (JavaScript/TypeScript)
 - ESLint + Prettier för linting/formattering
-- TypeScript strikt mode
+- TypeScript strikt mode (för frontend)
+
+## Backend-språkval (kontextbaserat)
+
+Välj språk baserat på projektbehov, inte vana:
+
+| Projekttyp | Förstaval | Alternativ |
+|------------|-----------|------------|
+| REST/GraphQL API | Go | Rust |
+| Fullstack web | Go + React | Next.js |
+| Realtime/WebSockets | Go | Rust |
+| CLI-verktyg | Go | Rust |
+| Serverless/Edge | TypeScript | Go |
+| ML/AI backend | Python | Go |
+| Laravel-projekt | PHP | - |
+
+### Ramverksval per språk
+- **Go:** stdlib > Chi > Echo
+- **Rust:** Axum > Actix
+- **TypeScript:** Hono > Elysia (på Bun)
+- **Python:** FastAPI > Flask
+
+### Undvik för ny backend
+- Node.js med Express/Fastify (välj Go)
+- Next.js API routes för ren backend (välj Go)
 
 ## Infrastruktur & Ekonomi
 - **Open source först** - välj alltid OSS framför proprietärt när möjligt

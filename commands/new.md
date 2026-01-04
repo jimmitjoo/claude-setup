@@ -15,19 +15,19 @@ Skapa ett nytt projekt med optimal struktur för 2026.
 /new expo           - React Native med Expo
 ```
 
-### Backend
+### Backend (Go som standard)
 ```
-/new api            - Node.js + Hono/Express + TypeScript
-/new api-go         - Go + Chi router
-/new api-rust       - Rust + Axum
+/new api            - Go + stdlib/Chi (rekommenderas)
+/new api-rust       - Rust + Axum (maximal prestanda)
+/new api-ts         - TypeScript + Hono på Bun (delad kod med frontend)
 /new laravel        - Laravel 11+ med Pest
 /new fastapi        - Python FastAPI
 ```
 
 ### Fullstack
 ```
-/new fullstack      - Next.js + tRPC + Prisma + Tailwind
-/new t3              - T3 Stack (Next, tRPC, Prisma, NextAuth)
+/new fullstack      - Go API + React frontend (separata appar)
+/new fullstack-next - Next.js + Drizzle + Tailwind (delad kodbas)
 ```
 
 ### Specialiserade
@@ -93,20 +93,23 @@ myapp/
 └── README.md
 ```
 
-### `/new api myapi`
+### `/new api myapi` (Go)
 ```
 myapi/
-├── src/
-│   ├── routes/
+├── cmd/
+│   └── api/
+│       └── main.go
+├── internal/
+│   ├── handlers/
 │   ├── services/
 │   ├── middleware/
-│   ├── db/
-│   └── index.ts
+│   └── db/
+├── pkg/
 ├── tests/
 ├── docker-compose.yml
 ├── Dockerfile
-├── package.json
-├── tsconfig.json
+├── go.mod
+├── Makefile
 ├── .env.example
 ├── CLAUDE.md
 └── README.md
