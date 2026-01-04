@@ -5,6 +5,17 @@ description: Docker, CI/CD, GitHub Actions, deployment, monitoring och infrastru
 
 # DevOps Best Practices
 
+## Hosting (EU-fokus)
+- **Hetzner** - Prisvärt, tyskt, bra för VPS
+- **Scaleway** - Franskt, bra object storage
+- **GleSYS** - Svenskt, GDPR-säkert
+- **Cloudflare** - Edge, Workers, R2 (gratis tier generös)
+
+### Undvik
+- AWS (dyrt, vendor lock-in, komplext)
+- Vercel Pro vid skala (dyrt)
+- US-baserade moln för känslig data
+
 ## Docker
 
 ### Multi-stage Dockerfile
@@ -194,6 +205,25 @@ logger.info('Request processed', {
 - Monitorera
 - Gradvis öka
 
+## Självhostad PaaS
+
+### Coolify (rekommenderas)
+```bash
+# Installera på VPS (Hetzner, GleSYS, etc.)
+curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
+```
+- Vercel/Netlify-liknande UX
+- Git push deploy
+- Automatiska SSL-certifikat
+- Databashantering
+
+### Dokku
+```bash
+# Minimal Heroku-klon
+wget https://dokku.com/install/v0.32.3/bootstrap.sh
+sudo bash bootstrap.sh
+```
+
 ## Security
 
 ### Container
@@ -204,6 +234,6 @@ logger.info('Request processed', {
 
 ### Secrets
 - Aldrig i kod/git
-- Använd secret managers
+- Använd: Infisical, Doppler, eller self-hosted Vault
 - Rotera regelbundet
 - Audit access

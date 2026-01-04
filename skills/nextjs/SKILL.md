@@ -279,15 +279,18 @@ export const config = {
 ```tsx
 // app/api/users/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { users } from '@/lib/schema';
+import { eq } from 'drizzle-orm';
 
 export async function GET() {
-  const users = await db.user.findMany();
-  return NextResponse.json(users);
+  const allUsers = await db.select().from(users);
+  return NextResponse.json(allUsers);
 }
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const user = await db.user.create({ data: body });
+  const [user] = await db.insert(users).values(body).returning();
   return NextResponse.json(user, { status: 201 });
 }
 
@@ -296,9 +299,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const user = await db.user.findUnique({
-    where: { id: params.id },
-  });
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, params.id));
 
   if (!user) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -357,3 +361,37 @@ const HeavyComponent = dynamic(() => import('./HeavyComponent'), {
   loading: () => <Skeleton />,
 });
 ```
+
+## Hosting
+
+### Cloudflare Pages (rekommenderas)
+```bash
+# next.config.js
+module.exports = {
+  output: 'export', // Statisk export
+  // eller
+  experimental: { runtime: 'edge' }, // Edge runtime
+};
+```
+
+### Självhostad (Coolify/VPS)
+```dockerfile
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+### Undvik vid skala
+- Vercel Pro (dyrt)
+- AWS Amplify (komplext)

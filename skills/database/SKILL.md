@@ -5,6 +5,11 @@ description: SQL och NoSQL databaser, queries, indexering, och optimering.
 
 # Database Best Practices
 
+## Databasval
+- **PostgreSQL** - förstaval för de flesta projekt
+- **SQLite** - enklare appar, edge/embedded
+- **Turso** - edge SQLite med replikering
+
 ## Schema Design
 
 ### Normalisering (SQL)
@@ -41,14 +46,14 @@ CREATE INDEX idx_posts_user_created ON posts(user_id, created_at DESC);
 ### Undvik N+1
 ```typescript
 // Dåligt - N+1 queries
-const users = await db.users.findMany();
+const users = await db.query.users.findMany();
 for (const user of users) {
-  user.posts = await db.posts.findMany({ where: { userId: user.id } });
+  user.posts = await db.query.posts.findMany({ where: eq(posts.userId, user.id) });
 }
 
-// Bra - Single query med JOIN
-const users = await db.users.findMany({
-  include: { posts: true }
+// Bra - Single query med relations
+const users = await db.query.users.findMany({
+  with: { posts: true }
 });
 ```
 
@@ -66,62 +71,99 @@ ORDER BY created_at DESC
 LIMIT 20;
 ```
 
-### Transactions
-```typescript
-await db.$transaction(async (tx) => {
-  const user = await tx.users.create({ data: userData });
-  await tx.accounts.create({
-    data: { userId: user.id, balance: 0 }
-  });
-  return user;
-});
-```
+## Drizzle ORM (föredra)
 
-## Prisma (ORM)
+Lättviktigt, typsäkert, nära SQL.
 
 ### Schema
-```prisma
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String
-  posts     Post[]
-  createdAt DateTime @default(now())
-}
+```typescript
+// schema.ts
+import { pgTable, uuid, varchar, text, timestamp } from 'drizzle-orm/pg-core';
 
-model Post {
-  id        String   @id @default(uuid())
-  title     String
-  content   String?
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String
-  createdAt DateTime @default(now())
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: varchar('email', { length: 255 }).unique().notNull(),
+  name: varchar('name', { length: 100 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
 
-  @@index([authorId])
-  @@index([createdAt(sort: Desc)])
-}
+export const posts = pgTable('posts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 255 }).notNull(),
+  content: text('content'),
+  authorId: uuid('author_id').references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow(),
+});
 ```
 
 ### Queries
 ```typescript
-// Filtrera och inkludera relationer
-const users = await prisma.user.findMany({
-  where: {
-    email: { endsWith: '@company.com' }
-  },
-  include: {
-    posts: {
-      take: 5,
-      orderBy: { createdAt: 'desc' }
-    }
-  },
+import { eq, desc } from 'drizzle-orm';
+import { db } from './db';
+import { users, posts } from './schema';
+
+// Select med filter
+const activeUsers = await db
+  .select()
+  .from(users)
+  .where(eq(users.email, 'user@company.com'));
+
+// Join
+const usersWithPosts = await db
+  .select()
+  .from(users)
+  .leftJoin(posts, eq(users.id, posts.authorId))
+  .orderBy(desc(posts.createdAt));
+
+// Insert
+await db.insert(users).values({
+  email: 'new@example.com',
+  name: 'New User',
 });
 
 // Upsert
-await prisma.user.upsert({
-  where: { email: 'user@example.com' },
-  create: { email: 'user@example.com', name: 'New User' },
-  update: { name: 'Updated User' },
+await db
+  .insert(users)
+  .values({ email: 'user@example.com', name: 'New User' })
+  .onConflictDoUpdate({
+    target: users.email,
+    set: { name: 'Updated User' },
+  });
+
+// Transaction
+await db.transaction(async (tx) => {
+  const [user] = await tx.insert(users).values(userData).returning();
+  await tx.insert(accounts).values({ userId: user.id, balance: 0 });
+  return user;
+});
+```
+
+### Relationer (query style)
+```typescript
+import { relations } from 'drizzle-orm';
+
+export const usersRelations = relations(users, ({ many }) => ({
+  posts: many(posts),
+}));
+
+export const postsRelations = relations(posts, ({ one }) => ({
+  author: one(users, { fields: [posts.authorId], references: [users.id] }),
+}));
+
+// Använd med query
+const usersWithPosts = await db.query.users.findMany({
+  with: { posts: { limit: 5 } },
+});
+```
+
+## Prisma (prototyper)
+
+OK för snabb MVP, men Drizzle föredras för produktion.
+
+```typescript
+// Prisma är mer "magiskt" men tyngre
+const users = await prisma.user.findMany({
+  include: { posts: true }
 });
 ```
 

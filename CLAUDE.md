@@ -42,6 +42,27 @@
 - ESLint + Prettier för linting/formattering
 - TypeScript strikt mode
 
+## Infrastruktur & Ekonomi
+- **Open source först** - välj alltid OSS framför proprietärt när möjligt
+- **Billig drift** - appar ska vara kostnadseffektiva att driva
+- **Europeiska servrar** - prioritera EU/svenska alternativ (GDPR, latens)
+
+### Undvik (om inte nödvändigt)
+- AWS → Hetzner, Scaleway, GleSYS (svensk)
+- Vercel Pro → Cloudflare Pages, Coolify, egen VPS
+- MongoDB Atlas → självhostad PostgreSQL/SQLite
+
+### Case-by-case
+- Prisma OK för snabb prototyp, föredra Drizzle/Kysely för produktion
+
+### Föredra
+- **Databas:** PostgreSQL, SQLite, Turso
+- **ORM:** Drizzle, Kysely, raw SQL
+- **Hosting:** Hetzner, Scaleway, Cloudflare, GleSYS
+- **Edge:** Cloudflare Workers
+- **Container:** Coolify, Dokku (självhostad PaaS)
+- **Object storage:** Cloudflare R2, MinIO
+
 ## Principer
 - YAGNI - You Ain't Gonna Need It
 - KISS - Keep It Simple, Stupid
